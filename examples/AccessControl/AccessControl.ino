@@ -87,16 +87,14 @@
 #define LED_OFF LOW
 #endif
 
-constexpr uint8_t redLed = 7;   // Set Led Pins
-constexpr uint8_t greenLed = 6;
-constexpr uint8_t blueLed = 5;
+#define redLed 7    // Set Led Pins
+#define greenLed 6
+#define blueLed 5
 
-constexpr uint8_t relay = 4;     // Set Relay Pin
-constexpr uint8_t wipeB = 3;     // Button pin for WipeMode
+#define relay 4     // Set Relay Pin
+#define wipeB 3     // Button pin for WipeMode
 
-boolean match = false;          // initialize card match to false
-boolean programMode = false;  // initialize programming mode to false
-boolean replaceMaster = false;
+bool programMode = false;  // initialize programming mode to false
 
 uint8_t successRead;    // Variable integer to keep if we have Successful Read from Reader
 
@@ -105,9 +103,8 @@ byte readCard[4];   // Stores scanned ID read from RFID Module
 byte masterCard[4];   // Stores master card's ID read from EEPROM
 
 // Create MFRC522 instance.
-constexpr uint8_t RST_PIN = 9;     // Configurable, see typical pin layout above
-constexpr uint8_t SS_PIN = 10;     // Configurable, see typical pin layout above
-
+#define SS_PIN 10
+#define RST_PIN 9
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 ///////////////////////////////////////// Setup ///////////////////////////////////
@@ -429,19 +426,13 @@ void deleteID( byte a[] ) {
 }
 
 ///////////////////////////////////////// Check Bytes   ///////////////////////////////////
-boolean checkTwo ( byte a[], byte b[] ) {
-  if ( a[0] != 0 )      // Make sure there is something in the array first
-    match = true;       // Assume they match at first
+bool checkTwo ( byte a[], byte b[] ) {   
   for ( uint8_t k = 0; k < 4; k++ ) {   // Loop 4 times
-    if ( a[k] != b[k] )     // IF a != b then set match = false, one fails, all fail
-      match = false;
+    if ( a[k] != b[k] ) {     // IF a != b then false, because: one fails, all fail
+       return false;
+    }
   }
-  if ( match ) {      // Check to see if if match is still true
-    return true;      // Return true
-  }
-  else  {
-    return false;       // Return false
-  }
+  return true;  
 }
 
 ///////////////////////////////////////// Find Slot   ///////////////////////////////////
@@ -452,19 +443,17 @@ uint8_t findIDSLOT( byte find[] ) {
     if ( checkTwo( find, storedCard ) ) {   // Check to see if the storedCard read from EEPROM
       // is the same as the find[] ID card passed
       return i;         // The slot number of the card
-      break;          // Stop looking we found it
     }
   }
 }
 
 ///////////////////////////////////////// Find ID From EEPROM   ///////////////////////////////////
-boolean findID( byte find[] ) {
+bool findID( byte find[] ) {
   uint8_t count = EEPROM.read(0);     // Read the first Byte of EEPROM that
   for ( uint8_t i = 1; i < count; i++ ) {    // Loop once for each EEPROM entry
     readID(i);          // Read an ID from EEPROM, it is stored in storedCard[4]
     if ( checkTwo( find, storedCard ) ) {   // Check to see if the storedCard read from EEPROM
       return true;
-      break;  // Stop looking we found it
     }
     else {    // If not, return false
     }
@@ -531,11 +520,8 @@ void successDelete() {
 
 ////////////////////// Check readCard IF is masterCard   ///////////////////////////////////
 // Check to see if the ID passed is the master programing card
-boolean isMaster( byte test[] ) {
-  if ( checkTwo( test, masterCard ) )
-    return true;
-  else
-    return false;
+bool isMaster( byte test[] ) {
+	return checkTwo(test, masterCard);
 }
 
 bool monitorWipeButton(uint32_t interval) {
